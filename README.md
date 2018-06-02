@@ -13,8 +13,7 @@ Também é incluída a biblioteca LibSonar, que fornece uma interface simples co
 
 ## Instalação
 
-Para instalar, basta clonar esse repositório (ou baixar como zip e extrair) para 
-a sua pasta Arduino/libraries ou sketchbook/libraries.
+Para instalar, basta baixar esse repositório (botao Clone or Download) e extrair o arquivo .zip para a sua pasta Arduino/libraries ou sketchbook/libraries.
 
 ## Começando a Utilizar
 
