@@ -9,7 +9,9 @@
  *    (Na UFRGS, aprendemos a teoria necessária para calcular os parâmetros na disciplina Controle I)
  *
  * As funções edu_moveReto(int velocidade), edu_para() e edu_rotaciona(int angulo)
- * fazem a movimentação do robô. 
+ * fazem a movimentação do robô.
+ * Perceba que embora haja controle de velocidade, ainda pode ocorer "drift" devido a erros numericos, entao use os
+ * fins de curso para ajuste! 
  * 
  * A rotina de exemplo mostra usos comuns dessas três funções. Velocidades negativas e ângulos negativos são aceitos.
  * 
