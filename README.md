@@ -18,6 +18,5 @@ a sua pasta Arduino/libraries ou sketchbook/libraries.
 
 ## Começando a Utilizar
 
-Para utilizar, recomenda-se abrir o exemplo edubotExemplo, (na IDE do arduino, em 
-exemplos-edubot). Esse arquivo ilustra os funcionamentos principais oferecidos por
-essa biblioteca, e pode ser usado como modelo.
+Para utilizar, recomenda-se abrir o exemplo edubotExemplo (imagem ilustrando como abrir: https://imgur.com/a/kOuJwNj). Esse arquivo mostra os funcionamentos principais oferecidos poressa biblioteca, e pode ser usado como modelo.
+
