@@ -1,5 +1,0 @@
-Edubot 	KEYWORD1
-edu_setup	KEYWORD2
-edu_rotaciona	KEYWORD2
-edu_moveReto	KEYWORD2
-edu_para	KEYWORD2

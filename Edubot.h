@@ -2,10 +2,10 @@
 #define EDUBOT_H
 #endif
 
-#include "LibMotor/LibMotor.h"
-#include "Encoder/Encoder.h"
-#include "LibSonar/LibSonar.h"
-#include "Controller/Controller.h"
+#include "LibMotor.h"
+#include "Encoder.h"
+#include "LibSonar.h"
+#include "Controller.h"
 #include "Pinos.h"
 
 
@@ -73,7 +73,7 @@ char count =0;      // Contador do timer2
  */
 void edu_para();
 /* edu_moveReto(int Speed);
- * Modifica o setpoint de velocidade de ambos os cotroladores para Speed, e ativa o controle
+ * Modifica o setpoint de velocidade de ambos os cotroladores para 'Speed', e ativa o controle
  * da velocidade linear.
  */
 void edu_moveReto(int Speed);
@@ -83,7 +83,7 @@ void edu_moveReto(int Speed);
  * -> o controle modifica as tensões em cada motor (ou seja, ainda não está implementado o controle de velocidade)
  * -> caso o erro de posicionamento angular entre uma iteração e a próxima seja menor que DEL_ERRO, sai da rotina
  * -> em ausência de erros ou deslizamento dos motores, o robô atinge o ângulo "Angulo"
- * ps: como pode-se notar, se o robô "trava" devido a algum erro, a rotina encerra antes de atingir o ângulo desejado
+ * ps: como pode-se notar, se o robô "trava" devido a algum erro mecanico, a rotina encerra antes de atingir o ângulo desejado
  */
 void edu_rotaciona(int Angulo);
 /**setup_timer2();

@@ -8,7 +8,7 @@
  *    Além disso, para que o robô rotacione exatos 90 graus, por exemplo, é necessário um controle de posição.
  *    (Na UFRGS, aprendemos a teoria necessária para calcular os parâmetros na disciplina Controle I)
  *
- * As funções edubot_moveReto(double velocidade), edubot_para() e edubot_rotaciona(double angulo)
+ * As funções edu_moveReto(int velocidade), edu_para() e edu_rotaciona(int angulo)
  * fazem a movimentação do robô. 
  * 
  * A rotina de exemplo mostra usos comuns dessas três funções. Velocidades negativas e ângulos negativos são aceitos.
@@ -16,7 +16,6 @@
  * Não é necessário alterar o código fonte Edubot.h!!
  */
 #include <Edubot.h>
-#include<LibSonar.h>
 
 //     *** Variáveis globais: ***
 
