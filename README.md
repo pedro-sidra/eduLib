@@ -19,3 +19,4 @@ Para instalar, basta baixar esse repositório (botao Clone or Download) e extrai
 
 Para utilizar, recomenda-se abrir o exemplo edubotExemplo (imagem ilustrando como abrir: https://imgur.com/a/kOuJwNj). Esse arquivo mostra os funcionamentos principais oferecidos por essa biblioteca, e pode ser usado como modelo.
 
+O arquivo Pinos.h define o pinout do EduBot. As variáveis definidas nele podem ser usadas no programa. Por exemplo, a leitura do fim de curso da frente e da direita pode ser feita com "digitalRead(FCFD)".
