@@ -8,7 +8,7 @@
 #endif
 
 /*
-	Edubot Portas Abertas 2018
+	Pinagem Atualizada do EduBot
 		Pinos
 	
 */
@@ -31,9 +31,10 @@
 #define TRIGL A4 //Trig Sonar da Esquerda
 /*
 	Pinos da Ponte H
-	Mover para frente: mEsquerda.setVoltage(-V) mDireita.setVoltage(V)
-	Girar para esquerda: mEsquerda.setVoltage(V) mDireita.setVoltage(V)
+	Mover para Frente: mEsquerda.setVoltage(V) mDireita.setVoltage(V)
+	Girar para Esquerda: mEsquerda.setVoltage(-V) mDireita.setVoltage(V)
 	Motor Esquerda - A	Motor Direita - B
+	(tensão positiva -> robô move para a frente)
 */
 #define IN1 5 
 #define IN2 6
@@ -41,8 +42,9 @@
 #define IN4 9
 /*
 	Pinos dos Encoders
-	Mover para Frente: encoderEsquerda - positivo encoderDireita - negativo
-	Girar para Esquerda: encoderEsquerda - negativo encoderDireita - negativo
+	Mover para Frente: encoderEsquerda - positivo encoderDireita - positivo
+	Girar para Esquerda: encoderEsquerda - negativo encoderDireita - positivo
+	(contagem positiva -> robô move  para a frente)
 */
 #define CHAD 2
 #define CHBD 11
