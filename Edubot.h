@@ -168,6 +168,10 @@ void edu_setup()
   mDireita.init(maxMvolt, maxBvolt);
   mEsquerda.init(maxMvolt, maxBvolt);
   setup_timer2();
+  pinMode(FCFE,input);
+  pinMode(FCFD,input);
+  pinMode(FCTE,input);
+  pinMode(FCTD,input);
 }
 
 ISR(TIMER2_COMPA_vect){//timer2 interrupt 8kHz

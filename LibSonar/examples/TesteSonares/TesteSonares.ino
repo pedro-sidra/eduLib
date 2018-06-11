@@ -50,12 +50,12 @@ void loop() {
     delay(100);
     //Distância medida pelo sensor da frente
     Serial.print(" Frente: ");
-    Serial.print(sonarRight.medeDistancia()); 
+    Serial.print(sonarFront.medeDistancia()); 
     Serial.print(" cm " );
     delay(100);
     //Distância medida pelo sensor da direita
     Serial.print(" Direita: ");
-    Serial.print(sonarFront.medeDistancia()); 
+    Serial.print(sonarRight.medeDistancia()); 
     Serial.println(" cm " );
     delay(100);
   

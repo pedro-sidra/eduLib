@@ -41,7 +41,6 @@ void medeDistancias();
 // Envia os dados de distancia para a serial (usar se for desejado)
 void mandaDistanciasSerial();
 
-
 //     *** Rotinas principais: ***
 
 void setup() {
@@ -66,7 +65,7 @@ void loop() {
   // Botar multiplos menores para diminuir a velocidade, e.x: 0.5*EDU_VMAX
   edu_moveReto(EDU_VMAX);
 
-  // Robo anda reto até que a distância à frente seja menor que 7 cm
+  // Robo anda reto até que a distância à frente seja menor que 7 cm...
   if(distF<7)
   {
     // Manda parar e espera um momento para garantir que o robô parou
@@ -89,8 +88,11 @@ void loop() {
 
     // ...e volta para o loop normal
   }
-  
-  
+  // ou até que haja colisao
+  else if(digitalRead(FCFD)==LOW || digitalRead(FCFE)==LOW)
+  {
+    edu_para(); // caso haja colisao, só desiste (para)
+  }  
 }
 
 // *** Definições das funções: ***
