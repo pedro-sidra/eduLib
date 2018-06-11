@@ -1,4 +1,4 @@
-#include "Controller.h"
+l#include "Controller.h"
 
 Controller::Controller(float Kp, float Ki, float Kd, float ts)
 {
@@ -18,7 +18,7 @@ float Controller::update(float nPV)
 {
 	_error =_SP - nPV; 
 	_dError = (_error - _errorLast)/_ts;
-	_iError += (_error + _errorLast)/(2*_ts);
+	_iError += _ts*((_error + _errorLast)/2);
 
 	return( _Kp*_error + _Ki*_iError + _Kd*_dError);
 
