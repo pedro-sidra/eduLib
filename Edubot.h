@@ -114,7 +114,7 @@ void edu_para()
 
 void edu_moveReto(int Speed)
 {
-  controlRight.setSP(-Speed);controlLeft.setSP(-Speed); 
+  controlRight.setSP(Speed);controlLeft.setSP(Speed); 
   control_frente = true;
 }
 
@@ -168,10 +168,10 @@ void edu_setup()
   mDireita.init(maxMvolt, maxBvolt);
   mEsquerda.init(maxMvolt, maxBvolt);
   setup_timer2();
-  pinMode(FCFE,input);
-  pinMode(FCFD,input);
-  pinMode(FCTE,input);
-  pinMode(FCTD,input);
+  pinMode(FCFE,INPUT);
+  pinMode(FCFD,INPUT);
+  pinMode(FCTE,INPUT);
+  pinMode(FCTD,INPUT);
 }
 
 ISR(TIMER2_COMPA_vect){//timer2 interrupt 8kHz
@@ -182,12 +182,12 @@ ISR(TIMER2_COMPA_vect){//timer2 interrupt 8kHz
       count = 0;
       knobLeftN = knobLeft.read();
       knobRightN= knobRight.read();
-      wD = (knobRightN-knobRightLast)/TS;
-      wE = (knobLeftN-knobLeftLast)/TS;
+      wD = degPP*(knobRightN-knobRightLast)/TS;
+      wE = degPP*(knobLeftN-knobLeftLast)/TS;
       if(control_frente)
       {
-        mEsquerda.setVoltage(-controlLeft.update(wE)); 
-        mDireita.setVoltage(-controlRight.update(wD));
+        mEsquerda.setVoltage(controlLeft.update(wE)); 
+        mDireita.setVoltage(controlRight.update(wD));
       }
       knobLeftLast = knobLeftN;
       knobRightLast = knobRightN;
