@@ -115,6 +115,10 @@ void setup_timer2();
  */
 void edu_setup();
 
+/** Satura valor entre lower e upper
+*
+*/
+double saturate(double in, double lower, double upper)
 /** ISR
  *  Interrupt Service Routine, ativada quando o timer2 estoura. No código, isso ocorre a 8 KHZ
  */
@@ -124,6 +128,19 @@ ISR(TIMER2_COMPA_vect);
 
 
 //----------------*** Definições das Funções ***------------------
+
+double saturate(double in, double lower, double upper)
+{
+	if(lower>upper)
+		return in;
+	if(in>upper)
+		return upper;
+	else if(in < lower)
+		return lower;
+	return in;	
+	
+}
+
 void edu_para()
 {
   mEsquerda.setVoltage(0);  
@@ -208,8 +225,8 @@ ISR(TIMER2_COMPA_vect){//timer2 interrupt 8kHz
       {
 	Vm = controlV.update((wE+wD)*EDU_R/2);
 	Vdiff = controlW.update((wE-wD)*EDU_RSOBREL);
-        mEsquerda.setVoltage(Vm+Vdiff); 
-        mDireita.setVoltage(Vm-Vdiff);
+        mEsquerda.setVoltage(saturate(Vm+Vdiff,-6,6)); 
+        mDireita.setVoltage(saturate(Vm-Vdiff,-6,6));
       }
       knobLeftLast = knobLeftN;
       knobRightLast = knobRightN;
