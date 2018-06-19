@@ -63,7 +63,7 @@ void loop() {
   // edu_moveReto(velocidade), faz o robo andar "reto" com a velocidade desejada.
   // VMAX é definido na biblioteca.
   // Botar multiplos menores para diminuir a velocidade, e.x: 0.5*EDU_VMAX
-  edu_moveReto(EDU_VMAX);
+  edu_moveReto(0.8*EDU_VMAX);
 
   // Robo anda reto até que a distância à frente seja menor que 7 cm...
   if(distF<7)
