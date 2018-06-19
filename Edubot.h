@@ -14,37 +14,59 @@
 // 1496 = pulses per revolution
 // 360/1496 = degrees per pulse
 #define PPV 1496
-#define degPP 0.2406 
+#define degPP 0.2406
+#define radPP 0.0042
 
 // *** Parâmetros físicos do EduBot:
 // Razao entre o raio das rodas e a distância do centro do edubot até as rodas: R/L = 0.1939
-#define RSOBREL 0.1939
+#define EDU_R 32
+#define EDU_L 162
+#define EDU_RSOBREL 0.1939
 
 
 // *** Parâmetros dos controladores:
 // para o controle de rotação. Caso o erro entre uma iteração e a próxima mude menos que DEL_ERRO, finaliza a rotina
 #define DEL_ERRO 1
 
-// Parâmetros para o controle PID dos motores direito e esquerdo:
-#define KPRIGHT 0.0102
-#define KIRIGHT 0.06
-#define KDRIGHT 0
-
-#define KPLEFT 0.0185
-#define KILEFT 0.0923
-#define KDLEFT 0
-// Também funcionam (automatic tuning do matlab):
-//#define KPRIGHT 0.13522
-//#define KIRIGHT 0.007
-//#define KPLEFT 0.13522
-//#define KILEFT 0.007
 
 // Tempo de amostragem
 #define TS 0.01
+
+// Duas topologias de controle: robo e motores
+#define EDU_CONTROL_ROBO
+//#define EDU_CONTROL_MOTORES
+#ifdef EDU_CONTROL_ROBO
 // SetPoint máximo de velocidade linear
-#define EDU_VMAX 500
+	#define EDU_VMAX 45
+	#define EDU_WMAX 5.5
 
+	#define KPV 0.225
+	#define KIV 2.25
+	#define KDV 0
 
+	#define KPW 2
+	#define KIW 20
+	#define KDW 0
+	Controller controlV (KPV, KIV, KDV,TS);
+	Controller controlW (KPW,  KIW,  KDW, TS);
+
+#endif
+#ifdef EDU_CONTROL_MOTORES
+	// Controladores PID:
+	// Parâmetros para o controle PID dos motores direito e esquerdo:
+	#define EDU_VMAX 500
+
+	#define KPRIGHT 0.0102
+	#define KIRIGHT 0.06
+	#define KDRIGHT 0
+
+	#define KPLEFT 0.0185
+	#define KILEFT 0.0923
+	#define KDLEFT 0
+	Controller controlRight (KPRIGHT, KIRIGHT, KDRIGHT,TS);
+	Controller controlLeft  (KPLEFT,  KILEFT,  KDLEFT, TS);
+
+#endif
 
 //----------------*** Inicialização de Objetos ***------------------
 
@@ -56,14 +78,12 @@ Encoder knobRight(CHAD, CHBD);
 Mdrive mDireita(IN1, IN2);
 Mdrive mEsquerda(IN3, IN4);
 
-// Controladores PID:
-Controller controlRight (KPRIGHT, KIRIGHT, KDRIGHT,TS);
-Controller controlLeft  (KPLEFT,  KILEFT,  KDLEFT, TS);
 
 //----------------*** Variáveis Globais ***------------------
 
 bool control_frente; // Ativa o controle para andar "reto"
 float wD,wE;        // Velocidades angulares de cada motor
+float Vm,Vdiff;	// Tensao media e tensao diferencial
 long knobLeftLast, knobRightLast, knobLeftN,knobRightN;// Valores de contagem dos encoders
 char count =0;      // Contador do timer2
 
@@ -127,19 +147,19 @@ void edu_rotaciona(int degs)
   knobLeft.write(0); knobRight.write(0);
   edu_para();
   delay(300);
-  do { //Giro para Direita 90 graus
-  newLeft = knobLeft.read();  newRight = knobRight.read();
-  errolast = erro;
-  erro = (double)degs-((newLeft - newRight)*degPP)*RSOBREL; 
-  derro = erro-errolast;
-  Vnew = 0.5*(erro + 0.6*derro);
-  mEsquerda.setVoltage(Vnew); 
-  mDireita.setVoltage(-Vnew);   
-  if(abs(erro-errolast)< DEL_ERRO)
-    ccount++;
-  else
-    ccount=0;
-  delay(30);
+  do { // Controle de rotação
+	  newLeft = knobLeft.read();  newRight = knobRight.read();
+	  errolast = erro;
+	  erro = (double)degs-((newLeft - newRight)*degPP)*RSOBREL; 
+	  derro = erro-errolast;
+	  Vnew = 0.5*(erro + 0.6*derro);
+	  mEsquerda.setVoltage(Vnew); 
+	  mDireita.setVoltage(-Vnew);   
+	  if(abs(erro-errolast)< DEL_ERRO)
+	    ccount++;
+	  else
+	    ccount=0;
+	  delay(30);
   } while (ccount <= 10);
   edu_para();
   delay(300);
@@ -182,12 +202,14 @@ ISR(TIMER2_COMPA_vect){//timer2 interrupt 8kHz
       count = 0;
       knobLeftN = knobLeft.read();
       knobRightN= knobRight.read();
-      wD = degPP*(knobRightN-knobRightLast)/TS;
-      wE = degPP*(knobLeftN-knobLeftLast)/TS;
+      wD = radPP*(knobRightN-knobRightLast)/TS;
+      wE = radPP*(knobLeftN-knobLeftLast)/TS;
       if(control_frente)
       {
-        mEsquerda.setVoltage(controlLeft.update(wE)); 
-        mDireita.setVoltage(controlRight.update(wD));
+	Vm = controlV.update((wE+wD)*EDU_R/2);
+	Vdiff = controlW.update((wE-wD)*EDU_RSOBREL);
+        mEsquerda.setVoltage(Vm+Vdiff); 
+        mDireita.setVoltage(Vm-Vdiff);
       }
       knobLeftLast = knobLeftN;
       knobRightLast = knobRightN;
