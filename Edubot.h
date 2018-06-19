@@ -19,9 +19,9 @@
 
 // *** Parâmetros físicos do EduBot:
 // Razao entre o raio das rodas e a distância do centro do edubot até as rodas: R/L = 0.1939
-#define EDU_R 32
-#define EDU_L 162
-#define EDU_RSOBREL 0.1939
+#define EDU_R 3.2
+#define EDU_L 16.2
+#define EDU_RSOBREL 0.1975
 
 
 // *** Parâmetros dos controladores:
@@ -37,7 +37,7 @@
 //#define EDU_CONTROL_MOTORES
 #ifdef EDU_CONTROL_ROBO
 // SetPoint máximo de velocidade linear
-	#define EDU_VMAX 45
+	#define EDU_VMAX 30
 	#define EDU_WMAX 5.5
 
 	#define KPV 0.225
