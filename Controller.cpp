@@ -10,8 +10,6 @@ Controller::Controller(float Kp, float Ki, float Kd, float ts)
   	
 	this->_errorLast = 0;
 	this->_iError = 0;
-	this->_lastC =0;
-	this->_sat = sat;
 	this->_SP = 0;
 	this->_integrate = true;
 }
