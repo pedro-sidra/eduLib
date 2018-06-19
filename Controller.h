@@ -8,6 +8,7 @@ public:
 	float update(float PV);
 	void reset();
 	void setSP(float);
+	void setIntegrator(bool tf);
 
 private:
 	float _error;
@@ -21,6 +22,9 @@ private:
 	float _Kp;
 	float _Ki;
 	float _Kd;
+
+	bool _integrate;
 };
+
 
 #endif
