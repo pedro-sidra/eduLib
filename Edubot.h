@@ -208,6 +208,10 @@ ISR(TIMER2_COMPA_vect){//timer2 interrupt 8kHz
       {
 	Vm = controlV.update((wE+wD)*EDU_R/2);
 	Vdiff = controlW.update((wE-wD)*EDU_RSOBREL);
+	if(Vm>6 || Vm < 6)
+		controlV.setIntegrator(false);
+	else
+		controlV.setIntegrator(true);
         mEsquerda.setVoltage(Vm+Vdiff); 
         mDireita.setVoltage(Vm-Vdiff);
       }
