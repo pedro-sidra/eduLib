@@ -208,8 +208,8 @@ ISR(TIMER2_COMPA_vect){//timer2 interrupt 8kHz
       {
 	Vm = controlV.update((wE+wD)*EDU_R/2);
 	Vdiff = controlW.update((wE-wD)*EDU_RSOBREL);
-        mEsquerda.setVoltage(Vm+Vdiff); 
-        mDireita.setVoltage(Vm-Vdiff);
+        mEsquerda.setVoltage(saturate(Vm+Vdiff,-6,6)); 
+        mDireita.setVoltage(saturate(Vm-Vdiff,-6,6));
       }
       knobLeftLast = knobLeftN;
       knobRightLast = knobRightN;
