@@ -26,15 +26,5 @@ private:
 	bool _integrate;
 };
 
-double saturate(double in, double lower, double upper)
-{
-	if(lower>upper)
-		return in;
-	if(in>upper)
-		return upper;
-	else if(in < lower)
-		return lower;
-	return in;	
-	
-}
+
 #endif

@@ -114,6 +114,10 @@ void setup_timer2();
  *  Inicializa todas as variáveis necessárias para funcionamento do Edubot
  */
 void edu_setup();
+/**
+* Satura in entre lower e upper
+*/
+double saturate(double in, double lower, double upper)
 
 /** ISR
  *  Interrupt Service Routine, ativada quando o timer2 estoura. No código, isso ocorre a 8 KHZ
@@ -130,6 +134,18 @@ void edu_para()
   mDireita.setVoltage(0);
   controlW.reset();controlV.reset(); 
   control_frente = false;
+}
+
+double saturate(double in, double lower, double upper)
+{
+	if(lower>upper)
+		return in;
+	if(in>upper)
+		return upper;
+	else if(in < lower)
+		return lower;
+	return in;	
+	
 }
 
 void edu_moveReto(int Speed)
@@ -208,12 +224,12 @@ ISR(TIMER2_COMPA_vect){//timer2 interrupt 8kHz
       {
 	Vm = controlV.update((wE+wD)*EDU_R/2);
 	Vdiff = controlW.update((wE-wD)*EDU_RSOBREL);
-	if(Vm>6 || Vm < 6)
+	if(Vm>6 || Vm < -6)
 		controlV.setIntegrator(false);
 	else
 		controlV.setIntegrator(true);
-        mEsquerda.setVoltage(Vm+Vdiff); 
-        mDireita.setVoltage(Vm-Vdiff);
+        mEsquerda.setVoltage(saturate(Vm+Vdiff,-6,6)); 
+        mDireita.setVoltage(saturate(Vm-Vdiff,-6,6));
       }
       knobLeftLast = knobLeftN;
       knobRightLast = knobRightN;
