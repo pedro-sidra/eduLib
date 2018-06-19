@@ -118,7 +118,7 @@ void edu_setup();
 /** Satura valor entre lower e upper
 *
 */
-double saturate(double in, double lower, double upper)
+double saturate(double in, double lower, double upper);
 /** ISR
  *  Interrupt Service Routine, ativada quando o timer2 estoura. No código, isso ocorre a 8 KHZ
  */
