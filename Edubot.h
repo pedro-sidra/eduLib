@@ -167,29 +167,25 @@ void edu_moveReto(int Speed)
 
 void edu_rotaciona(int degs)
 {
-  control_on = false;
-  long newLeft=0, newRight=0,Vnew=0;
-  double erro=0, errolast=0, derro=0;
+  control_on =true;
+  double degsRad = (double)degs*0.0174533;
+  double erro=0,errolast=0;
+  double kp = 2;
   char ccount=0;
   knobLeft.write(0); knobRight.write(0);
-  edu_para();
-  delay(300);
+  edu_paraControlado();
+  delay(400);
   do { // Controle de rotação
-	  newLeft = knobLeft.read();  newRight = knobRight.read();
-	  errolast = erro;
-	  erro = (double)degs-((newLeft - newRight)*degPP)*EDU_RSOBREL; 
-	  derro = erro-errolast;
-	  Vnew = 0.5*(erro + 0.6*derro);
-	  mEsquerda.setVoltage(Vnew); 
-	  mDireita.setVoltage(-Vnew);   
-	  if(abs(erro-errolast)< DEL_ERRO)
-	    ccount++;
-	  else
-	    ccount=0;
-	  delay(30);
+	errolast=erro;	  
+	erro = degsRad-((knobLeftN - knobRightN)*radPP)*EDU_RSOBREL; 
+	controlW.setSP(erro*kp);
+	if(abs(erro-errolast)< DEL_ERRO)
+		ccount++;
+	else
+		ccount=0;
   } while (ccount <= 10);
-  edu_para();
-  delay(300);
+  edu_paraControlado();
+  delay(400);
 }
 
 
