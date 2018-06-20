@@ -136,6 +136,7 @@ ISR(TIMER2_COMPA_vect);
 void edu_para()
 {
   controlV.setSP(0);controlW.setSP(0); 
+  controlW.reset();controlV.reset(); 
   control_on = true;
 }
 
