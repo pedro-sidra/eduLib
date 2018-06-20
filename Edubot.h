@@ -135,6 +135,14 @@ ISR(TIMER2_COMPA_vect);
 //----------------*** Definições das Funções ***------------------
 void edu_para()
 {
+  mEsquerda.setVoltage(0);  
+  mDireita.setVoltage(0);
+  controlW.reset();controlV.reset(); 
+  control_on = false;
+}
+
+void edu_paraControlado()
+{
   controlV.setSP(0);controlW.setSP(0); 
   control_on = true;
 }
