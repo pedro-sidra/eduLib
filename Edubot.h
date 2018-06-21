@@ -26,7 +26,7 @@
 
 // *** Parâmetros dos controladores:
 // para o controle de rotação. Caso o erro entre uma iteração e a próxima mude menos que DEL_ERRO, finaliza a rotina
-#define DEL_ERRO 1
+#define DEL_ERRO 0.005
 
 
 // Tempo de amostragem
@@ -82,7 +82,9 @@ Mdrive mEsquerda(IN3, IN4);
 //----------------*** Variáveis Globais ***------------------
 
 bool control_on; // Ativa o controle para andar "reto"
+bool theta_on=false;
 float wD,wE;        // Velocidades angulares de cada motor
+double theta =0;
 float Vm,Vdiff;	// Tensao media e tensao diferencial
 long knobLeftLast, knobRightLast, knobLeftN,knobRightN;// Valores de contagem dos encoders
 char count =0;      // Contador do timer2
@@ -169,21 +171,24 @@ void edu_rotaciona(int degs)
 {
   control_on =true;
   double degsRad = (double)degs*0.0174533;
-  double erro=0,errolast=0;
-  double kp = 2;
+  double erro=0,errolast=0,ierro=0;
+  double kp = 2,ki=0.01;
   char ccount=0;
-  knobLeft.write(0); knobRight.write(0);
   edu_paraControlado();
   delay(400);
+  theta_on=true;theta=0;
   do { // Controle de rotação
-	errolast=erro;	  
-	erro = degsRad-((knobLeftN - knobRightN)*radPP)*EDU_RSOBREL; 
-	controlW.setSP(erro*kp);
-	if(abs(erro-errolast)< DEL_ERRO)
-		ccount++;
-	else
-		ccount=0;
-  } while (ccount <= 10);
+	errolast=erro;
+	erro = degsRad-theta;
+	ierro+=erro*TS;
+	controlW.setSP(erro*kp+ierro*ki);
+	//if(erro< DEL_ERRO)
+	//	ccount++;
+	//else
+	//	ccount=0;
+	delay(10);
+  } while (true);
+  theta=0;theta_on=false;
   edu_paraControlado();
   delay(400);
 }
@@ -254,6 +259,10 @@ ISR(TIMER2_COMPA_vect){//timer2 interrupt 8kHz
 	// Satura as tensões nos motores e seta
 	mEsquerda.setVoltage(saturate(Ve,-maxMvolt,maxMvolt)); 
         mDireita.setVoltage(saturate(Vd,-maxMvolt,maxMvolt));
+      }
+      if(theta_on)
+      {
+	theta+=(wE-wD)*EDU_RSOBREL*TS;
       }
     
   }
