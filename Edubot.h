@@ -175,17 +175,13 @@ void edu_moveReto(int Speed)
 
 void edu_rotaciona(int degs)
 {
-  control_on =true;
   double degsRad = (double)degs*0.0174533;
-  double erro=0,errolast=0,ierro=0;
-  double kp = 2,ki=0.01;
   char ccount=0;
-  edu_paraControlado();
+  edu_para();
   delay(400);
-  theta_on=true;theta=0;
   ControlTheta.reset();ControlTheta.setSP(degsRad);
+  control_on =true;theta_on=true;theta=0;
   do { // Controle de rotação
-	
 	controlW.setSP(ControlTheta.update(theta));
 	//if(erro< DEL_ERRO)
 	//	ccount++;
@@ -194,7 +190,7 @@ void edu_rotaciona(int degs)
 	delay(10);
   } while (true);
   theta=0;theta_on=false;
-  edu_paraControlado();
+  edu_para();
   delay(400);
 }
 
@@ -254,12 +250,20 @@ ISR(TIMER2_COMPA_vect){//timer2 interrupt 8kHz
 	// Tensões nos motores direito e esquerdo
 	double Ve = Vm+Vdiff;
 	double Vd = Vm-Vdiff;
-
+	if(Ve>0)
+		Ve +=1;
+	else if(Ve<0)
+		Ve-=1;
+	if(Vd>0)
+		Vd +=1;
+	else if(Vd<0)
+		Vd-=1;
 	// Liga o integrador apenas quando não há saturação dos motores:
 	// (Implementação de anti-windup)
 	bool noSat = abs(Ve)<maxMvolt && abs(Vd) < maxMvolt;
 	controlV.setIntegrator(noSat);
 	controlW.setIntegrator(noSat);
+	ControlTheta.setIntegrator(noSat);
 	
 	// Satura as tensões nos motores e seta
 	mEsquerda.setVoltage(saturate(Ve,-maxMvolt,maxMvolt)); 
