@@ -96,7 +96,7 @@ void edu_para();
  * Modifica o setpoint de velocidade de ambos os cotroladores para 'Speed', e ativa o controle
  * da velocidade linear.
  */
-void edu_moveReto(int Speed);
+void edu_moveReto(double Speed);
 /** edu_rotaciona(int degs);
  * Desativa o controle da velocidade linear, e interrompe a execução em um while:
  * -> dentro do while, realiza controle PD da posição angular do robô (a partir de um modelo simples)
@@ -105,7 +105,7 @@ void edu_moveReto(int Speed);
  * -> em ausência de erros ou deslizamento dos motores, o robô atinge o ângulo "Angulo"
  * ps: como pode-se notar, se o robô "trava" devido a algum erro mecanico, a rotina encerra antes de atingir o ângulo desejado
  */
-void edu_rotaciona(int Angulo);
+void edu_rotaciona(double Angulo);
 /**setup_timer2();
  * inicializa o timer2, necessário para fazer o controle a uma taxa de amostragem constante
  */
@@ -114,7 +114,7 @@ void edu_rotaciona(int Angulo);
 * move o edubot a velocidade linear V (cm/s) e velocidade angular w (rad/s)
 *
 */ 
-void edu_moveVW(int speedV,int speedW);
+void edu_moveVW(double speedV,double speedW);
 void setup_timer2();
 /** edu_setup()
  *  Inicializa todas as variáveis necessárias para funcionamento do Edubot
@@ -165,13 +165,13 @@ double saturate(double in, double lower, double upper)
 	
 }
 
-void edu_moveReto(int Speed)
+void edu_moveReto(double Speed)
 {
   controlV.setSP(Speed);controlW.setSP(0); 
   control_on = true;
 }
 
-void edu_rotaciona(int degs)
+void edu_rotaciona(double degs)
 {
   control_on = false;
   long newLeft=0, newRight=0,Vnew=0;
@@ -197,7 +197,6 @@ void edu_rotaciona(int degs)
   edu_para();
   delay(300);
 }
-
 
 
 void setup_timer2()
@@ -227,7 +226,7 @@ void edu_setup()
   pinMode(FCTD,INPUT);
 }
 
-void edu_moveVW(int speedV,int speedW)
+void edu_moveVW(double speedV,double speedW)
 {
 	controlV.setSP(speedV);
 	controlW.setSP(speedW);
