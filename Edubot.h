@@ -226,6 +226,15 @@ void edu_setup()
   pinMode(FCTD,INPUT);
 }
 
+void edu_arco(double degs, double R, double w)
+{
+	controlV.setSP(R*w);
+	controlW.setSP(w);
+	control_on=true;
+	delay((long)(degs/w*1000)+100);
+	edu_para();delay(300);
+}
+
 void edu_moveVW(double speedV,double speedW)
 {
 	controlV.setSP(speedV);
