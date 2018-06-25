@@ -47,9 +47,15 @@
 	#define KPW 2
 	#define KIW 20
 	#define KDW 0
+	
+	#define KPT 9
+	#define KIT 27
+	#define KDT 0
+
+
 	Controller controlV (KPV, KIV, KDV,TS);
 	Controller controlW (KPW,  KIW,  KDW, TS);
-
+	Controller ControlTheta(KPT,KIT,KDT,TS);
 #endif
 #ifdef EDU_CONTROL_MOTORES
 	// Controladores PID:
@@ -177,11 +183,10 @@ void edu_rotaciona(int degs)
   edu_paraControlado();
   delay(400);
   theta_on=true;theta=0;
+  ControlTheta.reset();ControlTheta.setSP(degsRad);
   do { // Controle de rotação
-	errolast=erro;
-	erro = degsRad-theta;
-	ierro+=erro*TS;
-	controlW.setSP(erro*kp+ierro*ki);
+	
+	controlW.setSP(ControlTheta.update(theta));
 	//if(erro< DEL_ERRO)
 	//	ccount++;
 	//else
