@@ -109,6 +109,12 @@ void edu_rotaciona(int Angulo);
 /**setup_timer2();
  * inicializa o timer2, necessário para fazer o controle a uma taxa de amostragem constante
  */
+
+/**  moveVW(int speedV,int speedW)
+* move o edubot a velocidade linear V (cm/s) e velocidade angular w (rad/s)
+*
+*/ 
+void edu_moveVW(int speedV,int speedW);
 void setup_timer2();
 /** edu_setup()
  *  Inicializa todas as variáveis necessárias para funcionamento do Edubot
@@ -219,6 +225,14 @@ void edu_setup()
   pinMode(FCFD,INPUT);
   pinMode(FCTE,INPUT);
   pinMode(FCTD,INPUT);
+}
+
+void edu_moveVW(int speedV,int speedW)
+{
+	controlV.setSP(speedV);
+	controlW.setSP(speedW);
+	control_on = true;
+	
 }
 
 void le_velocidades_motores()
