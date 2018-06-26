@@ -56,43 +56,17 @@ void setup() {
 
 
 void loop() {
-
-  // Adquire as distâncias dos sonares
-  medeDistancias();
-
-  // edu_moveReto(velocidade), faz o robo andar "reto" com a velocidade desejada.
-  // VMAX é definido na biblioteca.
-  // Botar multiplos menores para diminuir a velocidade, e.x: 0.5*EDU_VMAX
-  edu_moveReto(0.8*EDU_VMAX);
-
-  // Robo anda reto até que a distância à frente seja menor que 7 cm...
-  if(distF<7)
-  {
-    // Manda parar e espera um momento para garantir que o robô parou
-    edu_para();
-    delay(500);
-
-    // Move com a velocidade máxima no sentido oposto (para tras)
-    // por 500 ms...
-    edu_moveReto(-EDU_VMAX);
-    delay(500);
-
-    // para...
-    edu_para();
-    delay(500);
-    
-    // rotaciona 180 graus positivos..
-    edu_rotaciona(180);
-    // rotaciona 90 graus negativos..
-    edu_rotaciona(-90);
-
-    // ...e volta para o loop normal
-  }
-  // ou até que haja colisao
-  else if(digitalRead(FCFD)==LOW || digitalRead(FCFE)==LOW)
-  {
-    edu_para(); // caso haja colisao, só desiste (para)
-  }  
+   // A função edu_rotaciona desta versão aceita 1, 2 ou 3 parâmetros de entrada
+   // Primeiro argumento: ângulo em graus
+   edu_rotaciona(180);
+   
+   // Segundo argumento: velocidade de rotação em rad/s
+   edu_rotaciona(180,EDU_WMAX);
+   
+   // terceiro argumento: distância do centro do robô até o centro do círculo de rotação (em cm)
+   // por padrão esse argumento é zero, ou seja, o robô rotaciona em torno de seu centro
+   // se o argumento for EDU_L, o robô rotaciona em torno da sua borda (aproximadamente...)
+    edu_rotaciona(180,EDU_WMAX*2/5,EDU_L);
 }
 
 // *** Definições das funções: ***
