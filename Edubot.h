@@ -48,9 +48,9 @@
 	#define KIW 20
 	#define KDW 0
 	
-	#define KPT 9
-	#define KIT 27
-	#define KDT 0
+	#define KPT 3 
+	#define KIT 9
+	#define KDT 0.1
 
 
 	Controller controlV (KPV, KIV, KDV,TS);
@@ -113,7 +113,7 @@ void edu_moveReto(int Speed);
  * -> em ausência de erros ou deslizamento dos motores, o robô atinge o ângulo "Angulo"
  * ps: como pode-se notar, se o robô "trava" devido a algum erro mecanico, a rotina encerra antes de atingir o ângulo desejado
  */
-void edu_rotaciona(int Angulo);
+void edu_rotaciona(double Angulo,double wRot);
 /**setup_timer2();
  * inicializa o timer2, necessário para fazer o controle a uma taxa de amostragem constante
  */
@@ -173,22 +173,30 @@ void edu_moveReto(int Speed)
   control_on = true;
 }
 
-void edu_rotaciona(int degs)
+void edu_rotaciona(double degs,double wRot=3)
 {
-  double degsRad = (double)degs*0.0174533;
+  double degsRad = degs*0.0174533;
+  double erro, erroLast;
   char ccount=0;
-  edu_para();
+  if(degsRad<0)
+      wRot = -wRot;
+  edu_paraControlado();
   delay(400);
   ControlTheta.reset();ControlTheta.setSP(degsRad);
   control_on =true;theta_on=true;theta=0;
-  do { // Controle de rotação
-	controlW.setSP(ControlTheta.update(theta));
-	//if(erro< DEL_ERRO)
-	//	ccount++;
-	//else
-	//	ccount=0;
-	delay(10);
-  } while (true);
+  erro = theta-degsRad;
+  do 
+  { // Controle de rotação
+    delay(10);
+    erroLast=erro;
+    erro = ((theta-degsRad)+erroLast)/2;
+    if(abs(erro) < 0.2*abs(degsRad))
+      controlW.setSP(saturate(ControlTheta.update(theta),-abs(wRot),abs(wRot)));
+    else
+      controlW.setSP(wRot);
+    if (abs(erro)<0.02)
+      ccount++;
+  } while (ccount<10);
   theta=0;theta_on=false;
   edu_para();
   delay(400);
@@ -271,7 +279,7 @@ ISR(TIMER2_COMPA_vect){//timer2 interrupt 8kHz
       }
       if(theta_on)
       {
-	theta+=(wE-wD)*EDU_RSOBREL*TS;
+	       theta+=(wE-wD)*EDU_RSOBREL*TS;
       }
     
   }
