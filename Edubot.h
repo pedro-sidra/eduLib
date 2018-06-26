@@ -176,7 +176,8 @@ void edu_moveReto(int Speed)
 void edu_rotaciona(double degs,double wRot=3)
 {
   double degsRad = degs*0.0174533;
-  double erro, erroLast;
+  double erro[3]={0,0,0};
+  double a,b;
   char ccount=0;
   if(degsRad<0)
       wRot = -wRot;
@@ -184,19 +185,17 @@ void edu_rotaciona(double degs,double wRot=3)
   delay(400);
   ControlTheta.reset();ControlTheta.setSP(degsRad);
   control_on =true;theta_on=true;theta=0;
-  erro = theta-degsRad;
+  erro[0] = theta-degsRad;
   do 
   { // Controle de rotação
     delay(10);
-    erroLast=erro;
-    erro = ((theta-degsRad)+erroLast)/2;
-    if(abs(erro) < 0.2*abs(degsRad))
-      controlW.setSP(saturate(ControlTheta.update(theta),-abs(wRot),abs(wRot)));
-    else
-      controlW.setSP(wRot);
-    if (abs(erro)<0.02)
-      ccount++;
-  } while (ccount<10);
+    erro[2]=erro[1];
+    erro[1]=erro[0];
+    erro[0] = theta-degsRad;
+    a = erro[0] -1.471*erro[1] + 0.5446*erro[2];
+    b = erro[0] + 2*erro[1] + erro[2];
+    controlW.setSP(50*a/b);
+  } while (true);
   theta=0;theta_on=false;
   edu_para();
   delay(400);
