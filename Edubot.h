@@ -113,7 +113,7 @@ void edu_moveReto(int Speed);
  * -> em ausência de erros ou deslizamento dos motores, o robô atinge o ângulo "Angulo"
  * ps: como pode-se notar, se o robô "trava" devido a algum erro mecanico, a rotina encerra antes de atingir o ângulo desejado
  */
-void edu_rotaciona(double Angulo,double wRot);
+void edu_rotaciona(double degs,double wRot=3,double R=0);
 /**setup_timer2();
  * inicializa o timer2, necessário para fazer o controle a uma taxa de amostragem constante
  */
@@ -173,10 +173,10 @@ void edu_moveReto(int Speed)
   control_on = true;
 }
 
-void edu_rotaciona(double degs,double wRot=3)
+void edu_rotaciona(double degs,double wRot,double R)
 {
   double degsRad = degs*0.0174533;
-  double erro, erroLast;
+  double erro, erroLast,wsp=0;
   char ccount=0;
   if(degsRad<0)
       wRot = -wRot;
@@ -191,14 +191,17 @@ void edu_rotaciona(double degs,double wRot=3)
     erroLast=erro;
     erro = ((theta-degsRad)+erroLast)/2;
     if(abs(erro) < 0.2*abs(degsRad))
-      controlW.setSP(saturate(ControlTheta.update(theta),-abs(wRot),abs(wRot)));
+      wsp=saturate(ControlTheta.update(theta),-abs(wRot),abs(wRot));
     else
-      controlW.setSP(wRot);
+      wsp=wRot;
+    controlV.setSP(R*wsp);
+    controlW.setSP(wsp);
     if (abs(erro)<0.02)
       ccount++;
+    Serial.println(theta);
   } while (ccount<10);
   theta=0;theta_on=false;
-  edu_para();
+  edu_paraControlado();
   delay(400);
 }
 
