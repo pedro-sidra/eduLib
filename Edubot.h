@@ -33,8 +33,8 @@
 #define TS 0.01
 
 // Duas topologias de controle: robo e motores
-#define EDU_CONTROL_ROBO
-//#define EDU_CONTROL_MOTORES
+//#define EDU_CONTROL_ROBO
+#define EDU_CONTROL_MOTORES
 #ifdef EDU_CONTROL_ROBO
 // SetPoint máximo de velocidade linear
 	#define EDU_VMAX 45
@@ -54,19 +54,20 @@
 #ifdef EDU_CONTROL_MOTORES
 	// Controladores PID:
 	// Parâmetros para o controle PID dos motores direito e esquerdo:
-	#define EDU_VMAX 500
+	#define EDU_VMAX 50
 
-	#define KPRIGHT 0.0102
-	#define KIRIGHT 0.06
-	#define KDRIGHT 0
+	#define KPRIGHT 1.26
+	#define KIRIGHT 10.3
+	#define KDRIGHT 0.00705
 
-	#define KPLEFT 0.0185
-	#define KILEFT 0.0923
-	#define KDLEFT 0
+	#define KPLEFT 1.26
+	#define KILEFT 10.3
+	#define KDLEFT 0.00705
 	Controller controlRight (KPRIGHT, KIRIGHT, KDRIGHT,TS);
 	Controller controlLeft  (KPLEFT,  KILEFT,  KDLEFT, TS);
 
 #endif
+
 
 //----------------*** Inicialização de Objetos ***------------------
 
@@ -83,6 +84,7 @@ Mdrive mEsquerda(IN3, IN4);
 
 bool control_on; // Ativa o controle para andar "reto"
 float wD,wE;        // Velocidades angulares de cada motor
+float vref=0,wref=0;
 float Vm,Vdiff;	// Tensao media e tensao diferencial
 long knobLeftLast, knobRightLast, knobLeftN,knobRightN;// Valores de contagem dos encoders
 char count =0;      // Contador do timer2
@@ -96,7 +98,7 @@ void edu_para();
  * Modifica o setpoint de velocidade de ambos os cotroladores para 'Speed', e ativa o controle
  * da velocidade linear.
  */
-void edu_moveReto(int Speed);
+void edu_moveReto(double Speed);
 /** edu_rotaciona(int degs);
  * Desativa o controle da velocidade linear, e interrompe a execução em um while:
  * -> dentro do while, realiza controle PD da posição angular do robô (a partir de um modelo simples)
@@ -133,18 +135,16 @@ ISR(TIMER2_COMPA_vect);
 
 
 //----------------*** Definições das Funções ***------------------
-void edu_para()
-{
-  mEsquerda.setVoltage(0);  
-  mDireita.setVoltage(0);
-  controlW.reset();controlV.reset(); 
-  control_on = false;
-}
 
 void edu_paraControlado()
 {
-  controlV.setSP(0);controlW.setSP(0); 
+  vref=0;
+  wref=0;
   control_on = true;
+}
+void edu_para()
+{
+  edu_paraControlado();
 }
 
 double saturate(double in, double lower, double upper)
@@ -159,9 +159,10 @@ double saturate(double in, double lower, double upper)
 	
 }
 
-void edu_moveReto(int Speed)
+void edu_moveReto(double Speed)
 {
-  controlV.setSP(Speed);controlW.setSP(0); 
+	vref = Speed;
+	wref = 0;
   control_on = true;
 }
 
@@ -231,6 +232,27 @@ void le_velocidades_motores()
       knobRightLast = knobRightN;
 }
 
+double getV(double wE, double wD)
+{
+	return (wE+wD)*EDU_R/2;
+}
+
+double getW(double wE, double wD)
+{
+	return (wE-wD)*EDU_RSOBREL;
+}
+
+double computeWd(double v, double w)
+{
+	return ( v/EDU_R - (0.5*w/EDU_RSOBREL) );
+}
+
+double computeWe(double v, double w)
+{
+	return ( v/EDU_R + (0.5*w/EDU_RSOBREL) );
+}
+
+
 ISR(TIMER2_COMPA_vect){//timer2 interrupt 8kHz
   
     count++;
@@ -242,18 +264,17 @@ ISR(TIMER2_COMPA_vect){//timer2 interrupt 8kHz
       {
 	// Tensão média entre os motores e tensão diferencial entre os motores
 	// são dadas pelos controladores de velocidade linear e angular, respectivamente
-	Vm = controlV.update((wE+wD)*EDU_R/2);
-	Vdiff = controlW.update((wE-wD)*EDU_RSOBREL);
-
+	controlRight.setSP(computeWd(vref,wref));
+	controlLeft.setSP(computeWe(vref,wref)); 
 	// Tensões nos motores direito e esquerdo
-	double Ve = Vm+Vdiff;
-	double Vd = Vm-Vdiff;
+	double Ve = controlRight.update(wE);
+	double Vd = controlLeft.update(wD);
 
 	// Liga o integrador apenas quando não há saturação dos motores:
 	// (Implementação de anti-windup)
 	bool noSat = abs(Ve)<maxMvolt && abs(Vd) < maxMvolt;
-	controlV.setIntegrator(noSat);
-	controlW.setIntegrator(noSat);
+	controlRight.setIntegrator(noSat);
+	controlLeft.setIntegrator(noSat);
 	
 	// Satura as tensões nos motores e seta
 	mEsquerda.setVoltage(saturate(Ve,-maxMvolt,maxMvolt)); 
