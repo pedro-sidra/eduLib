@@ -1,4 +1,0 @@
-LibSonar	KEYWORD1
-Sonar	KEYWORD1
-medeDistancia	KEYWORD2
-
