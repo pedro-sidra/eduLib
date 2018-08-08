@@ -2,10 +2,10 @@
 #define EDUBOT_H
 #endif
 
-#include <LibMotor.h>
-#include <Encoder.h>
-#include <LibSonar.h>
-#include <Controller.h>
+#include "../LibMotor/LibMotor.h"
+#include "../Encoder/Encoder.h"
+#include "../LibSonar/LibSonar.h"
+#include "../Controller/Controller.h"
 #include "Pinos.h"
 
 

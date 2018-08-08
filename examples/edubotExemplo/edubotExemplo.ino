@@ -19,6 +19,11 @@
  */
 #include <Edubot.h>
 
+// Arduino IDE won't link these dependencies from Edubot.h, so put them here...
+#include <LibMotor.h>
+#include <Encoder.h>
+#include <LibSonar.h>
+#include <Controller.h>
 //     *** Variáveis globais: ***
 
 
