@@ -222,8 +222,10 @@ void edu_update()
 {
 	le_velocidades_motores();
 	if(control_on)
+	{
 		rodaEsq.setVoltage(controlLeft.update(rodaEsq.getW()));
 		rodaDir.setVoltage(controlRight.update(rodaDir.getW()));
+	}
 }
 
 
