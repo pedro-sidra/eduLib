@@ -166,6 +166,13 @@ void edu_moveReto(double v)
 	control_on = true;
 }
 
+void edu_moveVW(double v, double w)
+{
+	controlRight.setSP(computeWd(v,w));
+	controlLeft.setSP(computeWe(v,w)); 
+	control_on = true;
+}
+
 void edu_rotaciona(double degs)
 {
 	edu_para();delay(300);
@@ -210,14 +217,6 @@ void edu_setup()
   rodaEsq.init(maxMvolt, maxBvolt);
   rodaDir.init(maxMvolt, maxBvolt);
   setup_timer2();
-}
-
-void edu_moveVW(double speedV,double speedW)
-{
-	controlV.setSP(speedV);
-	controlW.setSP(speedW);
-	control_on = true;
-	
 }
 
 void le_velocidades_motores()
