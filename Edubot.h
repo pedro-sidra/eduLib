@@ -136,8 +136,7 @@ double computeWe(double v, double w)
 
 void edu_paraControlado()
 {
-	controlRight.setSP(computeWd(0,0));
-	controlLeft.setSP(computeWe(0,0)); 
+	edu_moveVW(0,0);
 	control_on = true;
 }
 void edu_para()
@@ -159,19 +158,23 @@ double saturate(double in, double lower, double upper)
 	
 }
 
-void edu_moveReto(double v)
-{
-	controlRight.setSP(computeWd(v,0));
-	controlLeft.setSP(computeWe(v,0)); 
-	control_on = true;
-}
-
-void edu_moveVW(double v, double w)
+void update_setPoint(double v, double w)
 {
 	controlRight.setSP(computeWd(v,w));
 	controlLeft.setSP(computeWe(v,w)); 
+}
+void edu_moveVW(double v, double w)
+{
+	update_setPoint(v,w);
 	control_on = true;
 }
+
+void edu_moveReto(double v)
+{
+	edu_moveVW(v,0);
+	control_on = true;
+}
+
 
 void edu_rotaciona(double degs)
 {
@@ -226,13 +229,18 @@ void le_velocidades_motores()
 }
 
 
+void update_control()
+{
+	rodaEsq.setVoltage(controlLeft.update(rodaEsq.getW()));
+	rodaDir.setVoltage(controlRight.update(rodaDir.getW()));
+}
+
 void edu_update()
 {
 	le_velocidades_motores();
 	if(control_on)
 	{
-		rodaEsq.setVoltage(controlLeft.update(rodaEsq.getW()));
-		rodaDir.setVoltage(controlRight.update(rodaDir.getW()));
+		update_control();
 	}
 }
 
