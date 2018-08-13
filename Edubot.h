@@ -26,7 +26,7 @@
 
 // *** Parâmetros dos controladores:
 // para o controle de rotação. Caso o erro entre uma iteração e a próxima mude menos que DEL_ERRO, finaliza a rotina
-#define DEL_ERRO 0.04
+#define DEL_ERRO 0.11
 
 
 // Tempo de amostragem
@@ -48,7 +48,7 @@
 	#define KDLEFT 0
 	Controller controlRight (KPRIGHT, KIRIGHT, KDRIGHT,TS);
 	Controller controlLeft  (KPLEFT,  KILEFT,  KDLEFT, TS);
-	Controller controlTheta (9.5, 0, 0.28,TS);
+	Controller controlTheta (9.5, 0.01, 0.28,TS);
 
 
 
@@ -136,7 +136,9 @@ void edu_paraControlado()
 }
 void edu_para()
 {
-  edu_paraControlado();
+	control_on=false;
+	rodaEsq.setVoltage(0);
+	rodaDir.setVoltage(0);
 }
 
 double saturate(double in, double lower, double upper)
@@ -173,11 +175,11 @@ void edu_rotaciona(double degs)
 	 char ccount=0;
 	 while(ccount < 10)
 	 {
-			 theta+=TS*getW(rodaEsq.getW(),rodaDir.getW());
+			 theta+=getW(rodaEsq.getDeltaTheta(),rodaDir.getDeltaTheta());
 			 double V = controlTheta.update(theta);
 			 rodaDir.setVoltage(-V);
 			 rodaEsq.setVoltage(V);
-			 if(controlTheta.getError() < DEL_ERRO)
+			 if(fabs(controlTheta.getError()) < DEL_ERRO)
 					 ccount++;
 			 else
 					 ccount=0;
