@@ -84,22 +84,24 @@ void loop() {
     	edu_rotate(-90);
   	}
 	// ---> or one of the contact switches has been hit
-  	else if(digitalRead(FCFD)==LOW || digitalRead(FCFE)==LOW)
+	// (contact switches: CFR (front right), CFL (front left), 
+	// CBR (back right), CBL ( back left)
+  	else if(digitalRead(CFR)==LOW || digitalRead(CFL)==LOW)
   	{
 		// Stops, moves back and turns around
     	edu_stop(); 
 		edu_moveLine(-EDU_VMAX);
 		delay(500);
 		edu_rotate(180);
-  	}  
+		}  
 }
 
 // *** Function definitions: ***
 void measureDists()
 {
-  distR = sonarRight.medeDistancia();
-  distL = sonarLeft.medeDistancia();
-  distF = sonarFront.medeDistancia();
+  distR = sonarRight.measureDist();
+  distL = sonarLeft.measureDist();
+  distF = sonarFront.measureDist();
 }
 
 void serialSendDists()

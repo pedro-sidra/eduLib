@@ -8,53 +8,50 @@
 #endif
 
 /*
-	Pinagem Atualizada do EduBot
-		Pinos
-	
+ * Updated pinout for 
 */
 
 /*
-	Pinos de Fim de Curso
+	Contact Switches
 */
-#define FCFE A0	// Fim de curso frente esquerda
-#define FCFD A1	// Fim de curso frente direita
-#define FCTE A2	// Fim de curso atras esquerda
-#define FCTD A3	// Fim de curso atras direita
+#define CFL A0	// Contact switch Front-Left
+#define CFR A1	// Contact switch Front-Right
+#define CBL A2	// Contact switch Back-Left
+#define CBR A3	// Contact switch Back-Right
 /*
-	Pinos dos Sonares
+   Pins used for the Sonars
 */
-#define ECHOF 7  //Echo Sonar da Frente
-#define TRIGF 8 //Trig Sonar da Frente
-#define ECHOR 12 //Echo Sonar da Direita
-#define TRIGR 13 //Trig Sonar da Direita
-#define ECHOL A5 //Echo Sonar da Esquerda
-#define TRIGL A4 //Trig Sonar da Esquerda
+#define ECHOF 7  //Echo Sonar Front
+#define TRIGF 8 //Trig Sonar  Front
+#define ECHOR 12 //Echo Sonar Right
+#define TRIGR 13 //Trig Sonar Right
+#define ECHOL A5 //Echo Sonar Left
+#define TRIGL A4 //Trig Sonar Left
 /*
-	Pinos da Ponte H
-	Mover para Frente: mEsquerda.setVoltage(V) mDireita.setVoltage(V)
-	Girar para Esquerda: mEsquerda.setVoltage(-V) mDireita.setVoltage(V)
-	Motor Esquerda - A	Motor Direita - B
-	(tensão positiva -> robô move para a frente)
+   H-Bridge pins
+   Should follow this standard:
+   ->Positive voltage on both motors moves the robot forward
+   ->Positive encoder count on both motors  moves the robot forward
+   ->Check: Clockwise rotation-> motor left has positive voltage, motor right has negative voltage
 */
-#define IN1 5 
-#define IN2 6
-#define IN3 10
-#define IN4 9
+#define RIGHT_BRIDGE_A 5 
+#define RIGHT_BRIDGE_B 6
+#define LEFT_BRIDGE_A 10
+#define LEFT_BRIDGE_B 9
 /*
 	Pinos dos Encoders
 	Mover para Frente: encoderEsquerda - positivo encoderDireita - positivo
 	Girar para Esquerda: encoderEsquerda - negativo encoderDireita - positivo
 	(contagem positiva -> robô move  para a frente)
 */
-#define CHAD 2
-#define CHBD 11
-#define CHAE 3
-#define CHBE 4
+#define RIGHT_ENCODER_A 2
+#define RIGHT_ENCODER_B 11
+#define LEFT_ENCODER_A 3
+#define LEFT_ENCODER_B 4
 /*
-	Tensões dos Motores e Bateria
+   Max Motor voltage and Max. Battery  voltage (steps down with the H-Bridge)
 */
 #define maxMvolt 6
 #define maxBvolt 6
-
 
 #endif

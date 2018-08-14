@@ -67,8 +67,16 @@ Controller controlTheta (KPTHETA, KITHETA, KDTHETA,TS);
 
 //----------------*** Object Initialization ***------------------
 // WheelDrives for each wheel (two digital pins for H-Bridge, two for encoder)
-WheelDrive wheelRight(IN1,IN2,CHAD,CHBD,EDU_R,radPP);
-WheelDrive wheelLeft(IN3,IN4,CHAE,CHBE,EDU_R,radPP);
+WheelDrive wheelRight(RIGHT_BRIDGE_A, 
+					  RIGHT_BRIDGE_B,
+					  RIGHT_ENCODER_A,
+					  RIGHT_ENCODER_B,
+					  EDU_R,radPP);
+WheelDrive wheelLeft(LEFT_BRIDGE_A, 
+					  LEFT_BRIDGE_B,
+					  LEFT_ENCODER_A,
+					  LEFT_ENCODER_B,
+					  EDU_R,radPP);
 
 //----------------*** Global Variables ***------------------
 
