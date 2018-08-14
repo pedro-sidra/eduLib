@@ -8,7 +8,7 @@
 #endif
 
 /*
- * Updated pinout for 
+ * Updated pinout for Edubot 
 */
 
 /*
@@ -31,19 +31,18 @@
    H-Bridge pins
    Should follow this standard:
    ->Positive voltage on both motors moves the robot forward
-   ->Positive encoder count on both motors  moves the robot forward
    ->Check: Clockwise rotation-> motor left has positive voltage, motor right has negative voltage
 */
 #define RIGHT_BRIDGE_A 5 
 #define RIGHT_BRIDGE_B 6
 #define LEFT_BRIDGE_A 10
 #define LEFT_BRIDGE_B 9
-/*
-	Pinos dos Encoders
-	Mover para Frente: encoderEsquerda - positivo encoderDireita - positivo
-	Girar para Esquerda: encoderEsquerda - negativo encoderDireita - positivo
-	(contagem positiva -> robô move  para a frente)
-*/
+/* 
+ * Encoder pins
+ * Should follow this standard:
+ *  ->Positive encoder count on both motors  moves the robot forward
+ *  ->Check: Clockwise rotation-> motor left has positive count, motor right has negative count
+ */
 #define RIGHT_ENCODER_A 2
 #define RIGHT_ENCODER_B 11
 #define LEFT_ENCODER_A 3
