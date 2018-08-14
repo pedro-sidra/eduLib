@@ -2,148 +2,151 @@
 #define EDUBOT_H
 #endif
 
+// Dependencies (should be in arduino's library directory)
 #include "../LibMotor/LibMotor.h"
 #include "../Encoder/Encoder.h"
 #include "../LibSonar/LibSonar.h"
 #include "../Controller/Controller.h"
-#include "Pinos.h"
+
+// Pinout for your robot
+//  The default Pinout.h provided defines EduBot's default connections
+#include "Pinout.h"
 
 
-//----------------*** Definições da Biblioteca ***------------------
-// *** Parâmetros dos encoders:
+//----------------*** Library Definitions ***------------------
+
+// *** Encoder params:
+
 // 1496 = pulses per revolution
 // 360/1496 = degrees per pulse
-#define PPV 1496
+// 2pi/1496 = radians per pulse
+#define PPR 1496
 #define degPP 0.2406
 #define radPP 0.0042
 
-// *** Parâmetros físicos do EduBot:
-// Razao entre o raio das rodas e a distância do centro do edubot até as rodas: R/L = 0.1939
+// *** Mechanical params:
+
+// R = Wheel radius,
+// L = Distance between wheels
+// EDU_RL = R/L should be calculated and put here literally to save computation time
 #define EDU_R 3.2
 #define EDU_L 16.2
-#define EDU_RSOBREL 0.1975
+#define EDU_RL 0.1975
 
 
-// *** Parâmetros dos controladores:
-// para o controle de rotação. Caso o erro entre uma iteração e a próxima mude menos que DEL_ERRO, finaliza a rotina
-#define DEL_ERRO 0.11
+// *** Controller params:
 
+// Minimum delta error for rotational control (in radians)
+// If error varies less than this between iterations, consider 
+// that the robot has finished its rotation
+#define DEL_ERROR 0.11
+// Maximum linear velocity
+#define EDU_VMAX 50
 
-// Tempo de amostragem
+// Sample time
 #define TS 0.01
 
-// Duas topologias de controle: robo e motores
-//#define EDU_CONTROL_ROBO
+// PID Controller gains for right and left motors:
+#define KPRIGHT 0.6 
+#define KIRIGHT 5
+#define KDRIGHT 0 
 
-	// Controladores PID:
-	// Parâmetros para o controle PID dos motores direito e esquerdo:
-	#define EDU_VMAX 50
+#define KPLEFT 0.6 
+#define KILEFT 5
+#define KDLEFT 0
 
-	#define KPRIGHT 0.6 
-	#define KIRIGHT 5
-	#define KDRIGHT 0 
+// Controller gains for rotational control:
+#define KPTHETA 9.5
+#define KITHETA 0.01
+#define KDTHETA 0.28 
 
-	#define KPLEFT 0.6 
-	#define KILEFT 5
-	#define KDLEFT 0
-	Controller controlRight (KPRIGHT, KIRIGHT, KDRIGHT,TS);
-	Controller controlLeft  (KPLEFT,  KILEFT,  KDLEFT, TS);
-	Controller controlTheta (9.5, 0.01, 0.28,TS);
+// Controller objects:
+Controller controlRight (KPRIGHT, KIRIGHT, KDRIGHT,TS);
+Controller controlLeft  (KPLEFT,  KILEFT,  KDLEFT, TS);
+Controller controlTheta (KPTHETA, KITHETA, KDTHETA,TS);
 
+//----------------*** Object Initialization ***------------------
+// WheelDrives for each wheel (two digital pins for H-Bridge, two for encoder)
+WheelDrive wheelRight(IN1,IN2,CHAD,CHBD,EDU_R,radPP);
+WheelDrive wheelLeft(IN3,IN4,CHAE,CHBE,EDU_R,radPP);
 
+//----------------*** Global Variables ***------------------
 
-//----------------*** Inicialização de Objetos ***------------------
-WheelDrive rodaDir(IN1,IN2,CHAD,CHBD,EDU_R,radPP);
-WheelDrive rodaEsq(IN3,IN4,CHAE,CHBE,EDU_R,radPP);
+// Turns controllers on or off 
+// TODO: Fix this implementation (turn off the controller objects and fix the update method
+// , don't use this bool...)
+bool control_on=false; 
 
-
-//----------------*** Variáveis Globais ***------------------
-
-bool control_on=false; // Ativa o controle para andar "reto"
-float vref=0,wref=0;
+// Counts to 80 within timer2 ISR to update at 100 Hz
+// TODO: get timer2 to generate ISR at 1/TS (100 Hz) without breaking everything else
 int count =0;      // Contador do timer2
 
-//----------------*** Funções ***------------------
-/** edu_para();
- * Seta as tensões nos dois motores para zero, e desativa o controle da velocidade linear
- */
-void edu_para();
-/* edu_moveReto(int Speed);
- * Modifica o setpoint de velocidade de ambos os cotroladores para 'Speed', e ativa o controle
- * da velocidade linear.
- */
-void edu_moveReto(double Speed);
-/** edu_rotaciona(int degs);
- * Desativa o controle da velocidade linear, e interrompe a execução em um while:
- * -> dentro do while, realiza controle PD da posição angular do robô (a partir de um modelo simples)
- * -> o controle modifica as tensões em cada motor (ou seja, ainda não está implementado o controle de velocidade)
- * -> caso o erro de posicionamento angular entre uma iteração e a próxima seja menor que DEL_ERRO, sai da rotina
- * -> em ausência de erros ou deslizamento dos motores, o robô atinge o ângulo "Angulo"
- * ps: como pode-se notar, se o robô "trava" devido a algum erro mecanico, a rotina encerra antes de atingir o ângulo desejado
- */
-void edu_rotaciona(double Angulo);
-/**setup_timer2();
- * inicializa o timer2, necessário para fazer o controle a uma taxa de amostragem constante
- */
+//----------------*** Function Prototypes ***------------------
 
-/**  moveVW(int speedV,int speedW)
-* move o edubot a velocidade linear V (cm/s) e velocidade angular w (rad/s)
-*
-*/ 
-void edu_moveVW(double speedV,double speedW);
+// *** "Top-Level": these functions must be executed for everything else to work.
+void edu_update(); // Run at sample rate (ISR)
+void edu_setup();  // Run once at startup
+
+// *** "Library-Level": used inside this .h file to abstract implementations
+void update_control();
+void readMotorData();
 void setup_timer2();
-/** edu_setup()
- *  Inicializa todas as variáveis necessárias para funcionamento do Edubot
- */
-void edu_setup();
-/** saturate(double in, double lower, double upper)
-* Satura "in" entre "lower" e "upper"
-* se lower > upper, retorna "in"
-*/
+void update_setPoint(double v, double w);
+
+// *** Movement Functions ("user-level"):
+void edu_stop();              // Stops the motors (open-loop)
+void edu_controlledStop();    // Stops the robot (closed-loop)
+void edu_rotate(double degs); // Rotates the robot by degs degrees
+void edu_moveLine(double v);  // Moves the robot in a straight line
+void edu_moveVW(double v, double w); // Moves the robot with specified linear and angular speed
+
+// *** Utility functions 
+
+// Saturation between lower and upper
 double saturate(double in, double lower, double upper);
-/**
-*
-*
-*/
 
-/** ISR
- *  Interrupt Service Routine, ativada quando o timer2 estoura. No código, isso ocorre a 8 KHZ
- */
-ISR(TIMER2_COMPA_vect);
-
+// Speed conversion  (v = linear velocity, w = angular velocity)
+// robot (v,w) -> motor w (left, right)
+double computeWl(double v, double w);
+double computeWr(double v, double w);
+// motor w (left, right) -> robot (v,w) 
+double getW(double Wl, double Wr);
+double getV(double Wl, double Wr);
 
 
-double getV(double wE, double wD)
+//----------------*** Function Definitions  ***------------------
+
+
+double getV(double Wl, double Wr)
 {
-	return (wE+wD)*EDU_R/2;
+	return (Wl+Wr)*EDU_R/2;
 }
 
-double getW(double wE, double wD)
+double getW(double Wl, double Wr)
 {
-	return (wE-wD)*EDU_RSOBREL;
+	return (Wl-Wr)*EDU_RL;
 }
 
-double computeWd(double v, double w)
+double computeWr(double v, double w)
 {
-	return ( v/EDU_R - (0.5*w/EDU_RSOBREL) );
+	return ( v/EDU_R - (0.5*w/EDU_RL) );
 }
 
-double computeWe(double v, double w)
+double computeWl(double v, double w)
 {
-	return ( v/EDU_R + (0.5*w/EDU_RSOBREL) );
+	return ( v/EDU_R + (0.5*w/EDU_RL) );
 }
-//----------------*** Definições das Funções ***------------------
 
-void edu_paraControlado()
+void edu_controlledStop()
 {
 	edu_moveVW(0,0);
 	control_on = true;
 }
-void edu_para()
+void edu_stop()
 {
 	control_on=false;
-	rodaEsq.setVoltage(0);
-	rodaDir.setVoltage(0);
+	wheelLeft.setVoltage(0);
+	wheelRight.setVoltage(0);
 }
 
 double saturate(double in, double lower, double upper)
@@ -155,13 +158,12 @@ double saturate(double in, double lower, double upper)
 	else if(in < lower)
 		return lower;
 	return in;	
-	
 }
 
 void update_setPoint(double v, double w)
 {
-	controlRight.setSP(computeWd(v,w));
-	controlLeft.setSP(computeWe(v,w)); 
+	controlRight.setSP(computeWr(v,w));
+	controlLeft.setSP(computeWl(v,w)); 
 }
 void edu_moveVW(double v, double w)
 {
@@ -169,85 +171,112 @@ void edu_moveVW(double v, double w)
 	control_on = true;
 }
 
-void edu_moveReto(double v)
+void edu_moveLine(double v)
 {
 	edu_moveVW(v,0);
 	control_on = true;
 }
 
-
-void edu_rotaciona(double degs)
+void edu_rotate(double degs)
 {
-	edu_para();delay(300);
-	 controlTheta.setSP(degs*3.14/180); 
-	 double wedu=0, theta=0;
-	 control_on = false;
-	 char ccount=0;
-	 while(ccount < 10)
-	 {
-			 theta+=getW(rodaEsq.getDeltaTheta(),rodaDir.getDeltaTheta());
-			 double V = controlTheta.update(theta);
-			 rodaDir.setVoltage(-V);
-			 rodaEsq.setVoltage(V);
-			 if(fabs(controlTheta.getError()) < DEL_ERRO)
-					 ccount++;
-			 else
-					 ccount=0;
-			 delay(10);
+	double theta=0;
+	char ccount=0;
+	
+	edu_stop();delay(300);
+
+	controlTheta.setSP(degs*3.14/180.0); 
+
+	control_on = false; // TODO: fix this confusing declaration
+						// control_on=false does not turn off controlTheta,
+						// only whatever is inside update_control()
+	while(ccount < 10)
+	{
+		// getW is used to convert delta theta from the wheels into delta
+		// theta for the robot
+		theta+=getW(wheelLeft.getDeltaTheta(),wheelRight.getDeltaTheta());
+
+		// TODO: implement a better controlTheta.
+		// This one is modelled considering differential voltage between
+		// the motors, but it can generate residual linear velocity
+		double V = controlTheta.update(theta);
+		wheelRight.setVoltage(-V);
+		wheelLeft.setVoltage(V);
+
+		// Stops this loop whenever the error varies less than DEL_ERROR for a while
+		if(fabs(controlTheta.getError()) < DEL_ERROR)
+			ccount++;
+		else
+			ccount=0;
+		// Delay has to be here to avoid competition between this loop and the ISR
+		delay(10);
 	 }
-	 edu_para();delay(300);
+	 edu_stop();delay(300);
 }
 
 
 void setup_timer2()
 {
-  control_on=false;
-  TCCR2A = 0;// set entire TCCR2A register to 0
-  TCCR2B = 0;// same for TCCR2B
-  TCNT2  = 0;//initialize counter value to 0
-  // set compare match register for 8khz increments
-  OCR2A = 249; //8kHz = (16*10^6) / (8000*8) - 1 (must be <256)
-  // turn on CTC mode
-  TCCR2A |= (1 << WGM21);
-  // Set CS21 bit for 8 prescaler
-  TCCR2B |= (1 << CS21);   
-  // enable timer compare interrupt
-  TIMSK2 |= (1 << OCIE2A);
+  	control_on=false;
+  	// This is stolen from https://www.instructables.com/id/Arduino-Timer-Interrupts/
+  	// TODO:Implement a better config for timer2 ... sorry!
+
+  	TCCR2A = 0;// set entire TCCR2A register to 0
+  	TCCR2B = 0;// same for TCCR2B
+  	TCNT2  = 0;//initialize counter value to 0
+  	// set compare match register for 8khz increments
+  	OCR2A = 249; //8kHz = (16*10^6) / (8000*8) - 1 (must be <256)
+  	// turn on CTC mode
+  	TCCR2A |= (1 << WGM21);
+  	// Set CS21 bit for 8 prescaler
+  	TCCR2B |= (1 << CS21);   
+  	// enable timer compare interrupt
+  	TIMSK2 |= (1 << OCIE2A);
 }
 
 void edu_setup()
 {
-  rodaEsq.init(maxMvolt, maxBvolt);
-  rodaDir.init(maxMvolt, maxBvolt);
-  setup_timer2();
+  	wheelLeft.init(maxMvolt, maxBvolt);
+  	wheelRight.init(maxMvolt, maxBvolt);
+  	setup_timer2();
 }
 
-void le_velocidades_motores()
+void readMotorData()
 {
-		rodaEsq.update(TS);
-		rodaDir.update(TS);
+	wheelLeft.update(TS);
+	wheelRight.update(TS);
 }
 
 
 void update_control()
 {
-	rodaEsq.setVoltage(controlLeft.update(rodaEsq.getW()));
-	rodaDir.setVoltage(controlRight.update(rodaDir.getW()));
+	// TODO: long stack, should be a better way to do this without more variables
+	// Sets the voltage of each motor
+	// to the value calculated by the controller
+	// considering the most recent angular speed of the motor
+	wheelLeft.setVoltage(controlLeft.update(wheelLeft.getW()));
+	wheelRight.setVoltage(controlRight.update(wheelRight.getW()));
 }
 
 void edu_update()
 {
-	le_velocidades_motores();
-	if(control_on)
+	// Anything inside this function runs at 100 Hz regardless 
+	// Do NOT put delays or loops here! 
+	// This should execute quickly
+
+	readMotorData(); // Updates angular speed of each motor
+	if(control_on) // If the controllers are on, update the motor voltages
 	{
 		update_control();
 	}
 }
 
 
-ISR(TIMER2_COMPA_vect){//timer2 interrupt 8kHz
+ISR(TIMER2_COMPA_vect){//timer2 interrupt @ 8kHz
+	// counts to 80 to reduce the frequency.
+	// I know, sorry...
+	// TODO: run the ISR at 100 Hz to save time
     count++;
-    if(count>80)// conta ate 80 a 8KHz -> amostragem a 100Hz
+    if(count>80)
 	{
 		count = 0;
 		edu_update();
