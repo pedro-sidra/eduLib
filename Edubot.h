@@ -197,7 +197,7 @@ void edu_rotate(double degs)
 	control_on = false; // TODO: fix this confusing declaration
 						// control_on=false does not turn off controlTheta,
 						// only whatever is inside update_control()
-	while(ccount < 10)
+	while(ccount < 20)
 	{
 		// getW is used to convert delta theta from the wheels into delta
 		// theta for the robot
