@@ -39,30 +39,67 @@
 // Minimum delta error for rotational control (in radians)
 // If error varies less than this between iterations, consider 
 // that the robot has finished its rotation
-#define DEL_ERROR 0.11
+#define DEL_ERROR 1
 // Maximum linear velocity
 #define EDU_VMAX 50
 
 // Sample time
 #define TS 0.01
 
-// PID Controller gains for right and left motors:
+// The following block defines the controllers to be used
+// There are two topologies implemented in this file:
+// ---> Individual Motors
+// ---  One PID controller for the left and one for the right motor
+// ---  Computes the Set Point for each based on the desired linear/angular velocity
+// ---  Tends to not work very well when the robot is disturbed (this claim is purely experimental)
+//
+// ---> Coupled Motors
+// ---  One PID controller for linear velocity, one for angular velocity
+// ---  Tends to work better when the robot is disturbed, and during acceleration
+// TODO: write this up, compare performances, and put the link here
+// 
+// To change topology, just use #define EDU_CONTROL_(TOPOLOGY_USED)
+// To implement a new topology or controller, add the definition to the list
+// below and change update_control and update_setPoint() functions accordingly
+//
+
+// This defines EDU_CONTROL_COUPLED_MOTORS as the standard
+#ifndef EDU_CONTROL_INDIVIDUAL_MOTORS
+#ifndef EDU_CONTROL_COUPLED_MOTORS
+
+#define EDU_CONTROL_COUPLED_MOTORS
+
+#endif
+#endif
+
+#ifdef EDU_CONTROL_INDIVIDUAL_MOTORS
+// PID Controllers for right and left motors:
 #define KPRIGHT 0.6 
 #define KIRIGHT 5
 #define KDRIGHT 0 
-
+Controller controlRight (KPRIGHT, KIRIGHT, KDRIGHT,TS);
 #define KPLEFT 0.6 
 #define KILEFT 5
 #define KDLEFT 0
-
-// Controller gains for rotational control:
-#define KPTHETA 9.5
-#define KITHETA 0.01
-#define KDTHETA 0.28 
-
-// Controller objects:
-Controller controlRight (KPRIGHT, KIRIGHT, KDRIGHT,TS);
 Controller controlLeft  (KPLEFT,  KILEFT,  KDLEFT, TS);
+#endif
+
+#ifdef EDU_CONTROL_COUPLED_MOTORS
+// PID Controllers for linear and angular velocity control:
+#define KPV 0.225
+#define KIV 2.25
+#define KDV 0 
+Controller controlV (KPV ,  KIV ,  KDV , TS);
+#define KPW 2
+#define KIW 20
+#define KDW 0
+Controller controlW (KPW , KIW , KDW ,TS);
+#endif
+
+// PID Controller for rotational control:
+#define KPTHETA 0.5
+#define KITHETA 0.0
+#define KDTHETA 0.03 
 Controller controlTheta (KPTHETA, KITHETA, KDTHETA,TS);
 
 //----------------*** Object Initialization ***------------------
@@ -87,12 +124,12 @@ bool control_on=false;
 
 // Counts to 80 within timer2 ISR to update at 100 Hz
 // TODO: get timer2 to generate ISR at 1/TS (100 Hz) without breaking everything else
-int count =0;      // Contador do timer2
+int count =0;      
 
 //----------------*** Function Prototypes ***------------------
 
 // *** "Top-Level": these functions must be executed for everything else to work.
-void edu_update(); // Run at sample rate (ISR)
+void edu_update(); // Run at sample rate (Inside ISR)
 void edu_setup();  // Run once at startup
 
 // *** "Library-Level": used inside this .h file to abstract implementations
@@ -124,6 +161,16 @@ double getV(double Wl, double Wr);
 
 //----------------*** Function Definitions  ***------------------
 
+double saturate(double in, double lower, double upper)
+{
+	if(lower>upper)
+		return in;
+	if(in>upper)
+		return upper;
+	else if(in < lower)
+		return lower;
+	return in;	
+}
 
 double getV(double Wl, double Wr)
 {
@@ -157,22 +204,6 @@ void edu_stop()
 	wheelRight.setVoltage(0);
 }
 
-double saturate(double in, double lower, double upper)
-{
-	if(lower>upper)
-		return in;
-	if(in>upper)
-		return upper;
-	else if(in < lower)
-		return lower;
-	return in;	
-}
-
-void update_setPoint(double v, double w)
-{
-	controlRight.setSP(computeWr(v,w));
-	controlLeft.setSP(computeWl(v,w)); 
-}
 void edu_moveVW(double v, double w)
 {
 	update_setPoint(v,w);
@@ -192,16 +223,16 @@ void edu_rotate(double degs)
 	
 	edu_stop();delay(300);
 
-	controlTheta.setSP(degs*3.14/180.0); 
+	controlTheta.setSP(degs); 
 
 	control_on = false; // TODO: fix this confusing declaration
 						// control_on=false does not turn off controlTheta,
 						// only whatever is inside update_control()
-	while(ccount < 20)
+	while(ccount < 10)
 	{
 		// getW is used to convert delta theta from the wheels into delta
 		// theta for the robot
-		theta+=getW(wheelLeft.getDeltaTheta(),wheelRight.getDeltaTheta());
+		theta+=degPP*getW(wheelLeft.getDeltaCount(),wheelRight.getDeltaCount());
 
 		// TODO: implement a better controlTheta.
 		// This one is modelled considering differential voltage between
@@ -261,8 +292,34 @@ void update_control()
 	// Sets the voltage of each motor
 	// to the value calculated by the controller
 	// considering the most recent angular speed of the motor
-	wheelLeft.setVoltage(controlLeft.update(wheelLeft.getW()));
-	wheelRight.setVoltage(controlRight.update(wheelRight.getW()));
+	
+#ifdef EDU_CONTROL_INDIVIDUAL_MOTORS
+	controlLeft.update(wheelLeft.getW());
+	controlRight.update(wheelRight.getW());
+
+	wheelLeft.setVoltage(controlLeft.getValue());
+	wheelRight.setVoltage(controlRight.getValue());
+#endif
+
+#ifdef EDU_CONTROL_COUPLED_MOTORS
+	controlV.update(getV(wheelLeft.getW(),wheelRight.getW()));
+	controlW.update(getW(wheelLeft.getW(),wheelRight.getW()));
+
+	wheelLeft.setVoltage(controlV.getValue()+controlW.getValue());
+	wheelRight.setVoltage(controlV.getValue()-controlW.getValue());
+#endif
+}
+
+void update_setPoint(double v, double w)
+{
+#ifdef EDU_CONTROL_INDIVIDUAL_MOTORS
+	controlLeft.setSP(computeWl(v,w));
+	controlRight.setSP(computeWr(v,w));
+#endif
+#ifdef EDU_CONTROL_COUPLED_MOTORS
+	controlW.setSP(w);
+	controlV.setSP(v); 
+#endif
 }
 
 void edu_update()
