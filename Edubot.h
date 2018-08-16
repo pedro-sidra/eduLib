@@ -45,6 +45,8 @@
 
 // Sample time
 #define TS 0.01
+// Output bounds
+#define OUTPUT_BOUND 6
 
 // The following block defines the controllers to be used
 // There are two topologies implemented in this file:
@@ -77,11 +79,11 @@
 #define KPRIGHT 0.6 
 #define KIRIGHT 5
 #define KDRIGHT 0 
-Controller controlRight (KPRIGHT, KIRIGHT, KDRIGHT,TS);
+Controller controlRight (KPRIGHT, KIRIGHT, KDRIGHT,TS,-OUTPUT_BOUND,OUTPUT_BOUND);
 #define KPLEFT 0.6 
 #define KILEFT 5
 #define KDLEFT 0
-Controller controlLeft  (KPLEFT,  KILEFT,  KDLEFT, TS);
+Controller controlLeft  (KPLEFT,  KILEFT,  KDLEFT, TS,-OUTPUT_BOUND,OUTPUT_BOUND);
 #endif
 
 #ifdef EDU_CONTROL_COUPLED_MOTORS
@@ -89,18 +91,18 @@ Controller controlLeft  (KPLEFT,  KILEFT,  KDLEFT, TS);
 #define KPV 0.225
 #define KIV 2.25
 #define KDV 0 
-Controller controlV (KPV ,  KIV ,  KDV , TS);
+Controller controlV (KPV ,  KIV ,  KDV , TS,-OUTPUT_BOUND,OUTPUT_BOUND);
 #define KPW 2
 #define KIW 20
 #define KDW 0
-Controller controlW (KPW , KIW , KDW ,TS);
+Controller controlW (KPW , KIW , KDW ,TS,-OUTPUT_BOUND,OUTPUT_BOUND);
 #endif
 
 // PID Controller for rotational control:
 #define KPTHETA 0.5
 #define KITHETA 0.0
 #define KDTHETA 0.03 
-Controller controlTheta (KPTHETA, KITHETA, KDTHETA,TS);
+Controller controlTheta (KPTHETA, KITHETA, KDTHETA,TS,-OUTPUT_BOUND,OUTPUT_BOUND);
 
 //----------------*** Object Initialization ***------------------
 // WheelDrives for each wheel (two digital pins for H-Bridge, two for encoder)
@@ -199,9 +201,7 @@ void edu_controlledStop()
 }
 void edu_stop()
 {
-	control_on=false;
-	wheelLeft.setVoltage(0);
-	wheelRight.setVoltage(0);
+	edu_controlledStop();
 }
 
 void edu_moveVW(double v, double w)
